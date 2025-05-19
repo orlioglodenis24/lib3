@@ -1,6 +1,7 @@
 from django import forms
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .models import BookReview, ReadingStatus, Genre
+from .models import Book
 
 
 class BookReviewForm(forms.ModelForm):

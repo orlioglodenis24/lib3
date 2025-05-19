@@ -8,6 +8,20 @@ from django.views.decorators.http import require_POST
 from .models import Book, Author, Genre, BookReview, ReadingStatus
 from .forms import BookReviewForm, ReadingStatusForm, BookSearchForm
 
+# books/views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')  # после регистрации идём на логин
+    else:
+        form = UserCreationForm()
+    return render(request, 'books/register.html', {'form': form})
+
 
 def index(request):
     """Homepage view showing latest books and popular titles."""
@@ -30,8 +44,12 @@ def index(request):
         'trending_books': trending_books,
         'genres': genres,
     })
+from django.contrib.auth.views import LogoutView
 
-
+class LogoutGetAllowedView(LogoutView):
+    # Разрешить logout по GET
+    http_method_names = ['get', 'post']
+    
 def book_list(request):
     """View for listing all books with search and filter functionality."""
     form = BookSearchForm(request.GET)

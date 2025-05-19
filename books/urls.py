@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -10,4 +12,6 @@ urlpatterns = [
     path("update-reading-status/<int:book_id>/", views.update_reading_status, name="update_reading_status"),
     path("update-progress/<int:status_id>/", views.update_progress, name="update_progress"),
     path("my-library/", views.my_library, name="my_library"),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('register/', views.register, name='register'),
 ]

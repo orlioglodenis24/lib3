@@ -1,0 +1,285 @@
+{% extends 'books/base.html' %}
+{% load static %}
+
+{% block title %}BookDiary - Track Your Reading Journey{% endblock %}
+
+{% block extra_css %}
+<style>
+ 
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Track Your Reading Journey</h1>
+            <p>Discover new books, track your reading progress, and connect with other readers on BookDiary</p>
+            <div class="hero-buttons">
+                <a href="{% url 'book_list' %}" class="hero-btn btn-light">Explore Books</a>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="hero-btn btn-outline">Create Account</a>
+                {% else %}
+                    <a href="{% url 'my_library' %}" class="hero-btn btn-outline">My Library</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Books Section -->
+<section class="featured-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>Featured Books</h2>
+            <a href="{% url 'book_list' %}">View All Books →</a>
+        </div>
+        
+        <div class="featured-books">
+            {% for book in featured_books %}
+                <div class="featured-book">
+                    <div class="featured-cover">
+                        {% if book.cover %}
+                            <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                        {% else %}
+                            <div class="no-cover">
+                                <i class="fas fa-book"></i>
+                                <span>{{ book.title }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="featured-info">
+                        <h3 class="featured-title">{{ book.title }}</h3>
+                        
+                        <div class="featured-authors">
+                            By 
+                            {% for author in book.authors.all %}
+                                <a href="{{ author.get_absolute_url }}">{{ author.name }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="book-rating">
+                            <div class="stars" data-rating="{{ book.get_average_rating|floatformat:1 }}">
+                                {% for i in "12345" %}
+                                    <i class="{% if forloop.counter <= book.get_average_rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="rating-value">{{ book.get_average_rating|floatformat:1 }}</span>
+                            <span class="reviews-count">({{ book.reviews.count }} reviews)</span>
+                        </div>
+                        
+                        <p class="featured-description">
+                            {{ book.description|truncatewords:40 }}
+                        </p>
+                        
+                        <div class="book-actions">
+                            <a href="{{ book.get_absolute_url }}" class="btn book-action-primary">
+                                <i class="fas fa-book-open"></i> Read More
+                            </a>
+                            
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'update_reading_status' book.id %}" class="btn book-action-secondary">
+                                    <i class="fas fa-bookmark"></i> Add to Library
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <p>No featured books available at the moment.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Recently Added Books -->
+<section class="recent-books">
+    <div class="container">
+        <div class="section-title">
+            <h2>Recently Added</h2>
+            <a href="{% url 'book_list' %}?sort=newest">See More →</a>
+        </div>
+        
+        <div class="book-grid">
+            {% for book in recent_books %}
+                <div class="book-card">
+                    <a href="{{ book.get_absolute_url }}">
+                        <div class="book-cover">
+                            {% if book.cover %}
+                                <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                            {% else %}
+                                <div class="no-cover">
+                                    <i class="fas fa-book"></i>
+                                    <span>{{ book.title }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="book-info">
+                            <h3 class="book-title">{{ book.title }}</h3>
+                            <div class="book-authors">
+                                {% for author in book.authors.all %}
+                                    <span>{{ author.name }}</span>{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="book-rating">
+                                <div class="stars" data-rating="{{ book.get_average_rating|floatformat:1 }}">
+                                    {% for i in "12345" %}
+                                        <i class="{% if forloop.counter <= book.get_average_rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-value">{{ book.get_average_rating|floatformat:1 }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <p>No books available at the moment.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Popular Genres -->
+<section class="genre-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>Popular Genres</h2>
+            <a href="{% url 'book_list' %}">All Genres →</a>
+        </div>
+        
+        <div class="genre-grid">
+            {% for genre in popular_genres %}
+                <a href="{{ genre.get_absolute_url }}" class="genre-card">
+                    {% if genre.image %}
+                        <img src="{{ genre.image.url }}" alt="{{ genre.name }}">
+                    {% else %}
+                        <div class="genre-placeholder"></div>
+                    {% endif %}
+                    <div class="genre-overlay">
+                        <span class="genre-name">{{ genre.name }}</span>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-bookmark"></i>
+                    <p>No genres available at the moment.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">{{ book_count }}</div>
+                <div class="stat-label">Books</div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-value">{{ author_count }}</div>
+                <div class="stat-label">Authors</div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-value">{{ user_count }}</div>
+                <div class="stat-label">Readers</div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-value">{{ review_count }}</div>
+                <div class="stat-label">Reviews</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials">
+    <div class="container">
+        <div class="section-title">
+            <h2>What Our Users Say</h2>
+        </div>
+        
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    "BookDiary has transformed how I track my reading. I love being able to see my progress and discover new books based on what I've enjoyed!"
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <div class="author-name">Sarah Johnson</div>
+                        <div class="author-title">Avid Reader</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    "I've discovered so many amazing books through the recommendations. The interface is intuitive and I love the community aspect!"
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <div class="author-name">Michael Chen</div>
+                        <div class="author-title">Book Enthusiast</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    "As someone who reads multiple books at once, BookDiary helps me keep track of everything. The reading progress feature is a game-changer!"
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <div class="author-name">Emily Rodriguez</div>
+                        <div class="author-title">Bookworm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section" style="background-color: #5D4037; color: white; text-align: center; padding: 60px 0; margin-bottom: 0;">
+    <div class="container">
+        <h2 style="font-size: 30px; margin-bottom: 15px;">Start Your Reading Journey Today</h2>
+        <p style="margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Join BookDiary to track your books, set reading goals, and connect with a community of readers.</p>
+        
+        {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn hero-btn btn-light" style="padding: 12px 30px; font-size: 18px;">Sign Up Now</a>
+        {% else %}
+            <a href="{% url 'my_library' %}" class="btn hero-btn btn-light" style="padding: 12px 30px; font-size: 18px;">Go to My Library</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any specific JavaScript for the homepage here
+    });
+</script>
+{% endblock %}
