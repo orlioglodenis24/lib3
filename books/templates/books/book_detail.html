@@ -1,0 +1,286 @@
+{% extends 'books/base.html' %}
+{% load static %}
+
+{% block title %}{{ book.title }} - BookDiary{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'books/css/book_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="book-detail">
+    <div class="container">
+        <div class="book-header">
+            <div class="book-cover">
+                {% if book.cover %}
+                    <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                {% else %}
+                    <div class="no-cover">
+                        <i class="fas fa-book"></i>
+                        <span>{{ book.title }}</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="book-info">
+                <h1 class="book-title">{{ book.title }}</h1>
+                
+                <div class="book-meta">
+                    <div class="authors">
+                        <span class="meta-label">By</span>
+                        {% for author in book.authors.all %}
+                            <a href="{{ author.get_absolute_url }}">{{ author.name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="genres">
+                        <span class="meta-label">Genres:</span>
+                        {% for genre in book.genres.all %}
+                            <a href="{{ genre.get_absolute_url }}" class="genre-tag">{{ genre.name }}</a>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="additional-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ book.release_year|default:"Unknown" }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-bookmark"></i>
+                            <span>{{ book.get_status_display }}</span>
+                        </div>
+                        
+                        <div class="info-item rating">
+                            <div class="stars" data-rating="{{ book.get_average_rating|floatformat:1 }}">
+                                {% for i in "12345" %}
+                                    <i class="{% if forloop.counter <= book.get_average_rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="rating-value">{{ book.get_average_rating|floatformat:1 }}</span>
+                            <span class="reviews-count">({{ book.reviews.count }} reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="book-actions">
+                    {% if user.is_authenticated %}
+                        <div class="reading-status">
+                            <form method="post" action="{% url 'update_reading_status' book.id %}" id="status-form">
+                                {% csrf_token %}
+                                <div class="status-selector">
+                                    {{ status_form.status }}
+                                    <button type="submit" class="btn btn-primary">Update Status</button>
+                                </div>
+                                
+                                {% if user_status and user_status.status == 'reading' %}
+                                    <div class="progress-tracker">
+                                        <label for="id_progress">Reading Progress:</label>
+                                        <div class="progress-input-container">
+                                            <input type="number" min="0" name="progress" value="{{ user_status.progress }}" id="progress-input" class="progress-input">
+                                            <span class="progress-label">chapters</span>
+                                            <button type="button" id="update-progress" class="btn btn-sm" data-status-id="{{ user_status.id }}">Update</button>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </form>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
+                            <i class="fas fa-bookmark"></i> Track Reading Status
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="book-content">
+            <div class="book-description">
+                <h2>About the Book</h2>
+                <div class="description-text">
+                    {{ book.description|linebreaks }}
+                </div>
+            </div>
+            
+            <div class="book-reviews">
+                <div class="reviews-header">
+                    <h2>Reviews</h2>
+                    <span class="reviews-count">{{ book.reviews.count }} Reviews</span>
+                </div>
+                
+                {% if user.is_authenticated %}
+                    <div class="review-form-container">
+                        <h3>{% if request.user in book.reviews.values_list('user', flat=True) %}Edit Your Review{% else %}Add Your Review{% endif %}</h3>
+                        <form method="post" class="review-form">
+                            {% csrf_token %}
+                            <div class="rating-input">
+                                <label>Your Rating:</label>
+                                {{ review_form.rating }}
+                                <div class="rating-stars">
+                                    {% for i in "12345678910" %}
+                                        <i class="far fa-star" data-value="{{ forloop.counter }}"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="comment-input">
+                                <label for="{{ review_form.comment.id_for_label }}">Your Review:</label>
+                                {{ review_form.comment }}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                {% if request.user in book.reviews.values_list('user', flat=True) %}Update Review{% else %}Submit Review{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+                
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="user-info">
+                                    <div class="avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="username">{{ review.user.username }}</div>
+                                </div>
+                                
+                                <div class="review-rating">
+                                    <div class="stars">
+                                        {% for i in "12345" %}
+                                            <i class="{% if forloop.counter <= review.rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <span class="rating-value">{{ review.rating }}/10</span>
+                                </div>
+                            </div>
+                            
+                            <div class="review-body">
+                                {% if review.comment %}
+                                    {{ review.comment|linebreaks }}
+                                {% else %}
+                                    <p class="no-comment">No written review</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="review-footer">
+                                <span class="review-date">{{ review.created|date:"F d, Y" }}</span>
+                                {% if review.user == request.user %}
+                                    <a href="#" class="edit-review">Edit</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="empty-reviews">
+                            <i class="fas fa-comment-alt"></i>
+                            <p>No reviews yet. Be the first to review this book!</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        {% if similar_books %}
+            <div class="similar-books">
+                <h2>Similar Books</h2>
+                <div class="book-grid">
+                    {% for book in similar_books %}
+                        <div class="book-card">
+                            <a href="{{ book.get_absolute_url }}">
+                                <div class="book-cover">
+                                    {% if book.cover %}
+                                        <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                                    {% else %}
+                                        <div class="no-cover">
+                                            <i class="fas fa-book"></i>
+                                            <span>{{ book.title }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="book-info">
+                                    <h3 class="book-title">{{ book.title }}</h3>
+                                    <div class="book-authors">
+                                        {% for author in book.authors.all %}
+                                            <span>{{ author.name }}</span>{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <div class="book-rating">
+                                        <div class="stars" data-rating="{{ book.get_average_rating|floatformat:1 }}">
+                                            {% for i in "12345" %}
+                                                <i class="{% if forloop.counter <= book.get_average_rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                            {% endfor %}
+                                        </div>
+                                        <span class="rating-value">{{ book.get_average_rating|floatformat:1 }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Rating stars functionality
+        const ratingStars = document.querySelectorAll('.rating-stars i');
+        const ratingInput = document.getElementById('id_rating');
+        
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                ratingInput.value = value;
+                
+                // Reset all stars
+                ratingStars.forEach(s => s.className = 'far fa-star');
+                
+                // Fill stars up to selected value
+                for (let i = 0; i < value; i++) {
+                    ratingStars[i].className = 'fas fa-star';
+                }
+            });
+        });
+        
+        // Update progress via AJAX
+        const updateProgressBtn = document.getElementById('update-progress');
+        if (updateProgressBtn) {
+            updateProgressBtn.addEventListener('click', function() {
+                const statusId = this.getAttribute('data-status-id');
+                const progress = document.getElementById('progress-input').value;
+                
+                fetch(`/update-progress/${statusId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: `progress=${progress}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success notification
+                        const notification = document.createElement('div');
+                        notification.className = 'notification success';
+                        notification.innerHTML = `Progress updated to ${data.progress} chapters`;
+                        document.body.appendChild(notification);
+                        
+                        // Remove notification after 3 seconds
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating progress:', error);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

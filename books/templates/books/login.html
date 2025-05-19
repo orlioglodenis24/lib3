@@ -1,0 +1,49 @@
+{% extends 'books/base.html' %}
+{% load static %}
+
+{% block title %}Login - BookDiary{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'books/css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to continue your reading journey</p>
+            </div>
+            
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    <input type="text" name="username" id="id_username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    <input type="password" name="password" id="id_password" required>
+                </div>
+                
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" name="remember" id="id_remember">
+                        <label for="id_remember">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{% url 'register' %}">Sign Up</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
