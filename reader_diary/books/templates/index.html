@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная — Читательский дневник{% endblock %}
+
+{% block content %}
+  <h2>Добро пожаловать в Читательский дневник!</h2>
+  <p>Здесь можно вести учет книг, цитат и записей.</p>
+
+
+  <div class="preview-section">
+  <div class="preview-grid">
+    <div class="preview-card">
+      <h3 class="preview-title">📚 Популярные книги</h3>
+      <ul class="preview-list">
+        {% for book in preview_books %}
+          <li>
+            <a href="{% url 'book_detail' book.id %}" class="preview-link">
+              <strong>{{ book.title }}</strong><br />
+              <span class="preview-subtext">— {{ book.author.name }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="preview-card">
+      <h3 class="preview-title">
+        🎨 <a href="{% url 'genres_and_authors' %}#genres" class="preview-title-link">Жанры</a>
+      </h3>
+      <ul class="preview-list">
+        {% for genre in preview_genres %}
+          <li><span class="preview-text">{{ genre.name }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="preview-card">
+      <h3 class="preview-title">
+        ✒️ <a href="{% url 'genres_and_authors' %}#authors" class="preview-title-link">Авторы</a>
+      </h3>
+      <ul class="preview-list">
+        {% for author in preview_authors %}
+          <li><span class="preview-text">{{ author.name }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Каталог книг — Читательский дневник{% endblock %}
+
+{% block content %}
+<section class="catalog">
+  <h2 class="catalog__title">Каталог книг</h2>
+
+  <div class="catalog__wrapper">
+
+    <!-- Sidebar фильтры -->
+    <aside class="catalog__filters-sidebar">
+      <form method="GET" action="{% url 'catalog' %}" id="filter-form" class="filter-form">
+
+        <div class="filter-form__group">
+          <label for="search" class="filter-form__label">🔍 Поиск</label>
+          <input
+            type="search"
+            id="search"
+            name="q"
+            value="{{ request.GET.q|default:'' }}"
+            placeholder="Название или автор"
+            class="filter-form__input"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="filter-form__group">
+          <label for="genre" class="filter-form__label">📚 Жанр</label>
+          <select name="genre" id="genre" class="filter-form__select" title="Выберите жанр">
+            <option value="">Все жанры</option>
+            {% for genre in genres %}
+              <option value="{{ genre.id }}" {% if genre.id|stringformat:"s" == request.GET.genre %}selected{% endif %}>{{ genre.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-form__group">
+          <label for="author" class="filter-form__label">✍️ Автор</label>
+          <select name="author" id="author" class="filter-form__select" title="Выберите автора">
+            <option value="">Все авторы</option>
+            {% for author in authors %}
+              <option value="{{ author.id }}" {% if author.id|stringformat:"s" == request.GET.author %}selected{% endif %}>{{ author.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-form__group">
+          <label for="year" class="filter-form__label">📅 Год издания</label>
+          <input
+            type="number"
+            name="year"
+            id="year"
+            value="{{ request.GET.year|default:'' }}"
+            placeholder="Например, 2020"
+            class="filter-form__input"
+            min="1500" max="2100"
+          />
+        </div>
+
+        <div class="filter-form__buttons">
+          <button type="submit" class="btn btn--primary">Применить</button>
+          <a href="{% url 'catalog' %}" class="btn btn--reset">Сбросить</a>
+        </div>
+      </form>
+    </aside>
+
+    <!-- Основной контент с книгами -->
+    <div class="catalog__books">
+
+      {% if books %}
+        <div class="books-grid">
+          {% for book in books %}
+            <article class="book-card" tabindex="0" aria-label="Книга {{ book.title }}">
+              {% if book.cover_image %}
+                <img
+                  src="{{ book.cover_image.url }}"
+                  alt="Обложка книги {{ book.title }}"
+                  class="book-card__image"
+                  loading="lazy"
+                />
+              {% else %}
+                <img
+                  src="{% static 'images/default_cover.jpg' %}"
+                  alt="Обложка книги {{ book.title }}"
+                  class="book-card__image"
+                  loading="lazy"
+                />
+              {% endif %}
+              <div class="book-card__info">
+                <h3 class="book-card__title">{{ book.title }}</h3>
+                <p class="book-card__author">Автор: <a href="{% url 'genres_and_authors' %}#author-{{ book.author.id }}">{{ book.author.name }}</a></p>
+                <p class="book-card__genre">Жанр: <a href="{% url 'genres_and_authors' %}#genre-{{ book.genre.id }}">{{ book.genre.name }}</a></p>
+                <a href="{% url 'book_detail' book.id %}" class="book-card__button" aria-label="Подробнее о книге {{ book.title }}">Подробнее</a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>Книг не найдено.</p>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

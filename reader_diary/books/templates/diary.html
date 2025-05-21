@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Дневник чтения — Читательский дневник{% endblock %}
+{% block content %}
+<section class="diary">
+  <h2 class="diary__title">Читательский дневник</h2>
+
+  {% if diary_entries %}
+    <ul class="diary__entries-list">
+      {% for entry in diary_entries %}
+      <li class="diary-entry">
+        <h3>{{ entry.book.title }}</h3>
+        <p><strong>Эмоции:</strong> {{ entry.emotions_rating }}/5</p>
+        <p><strong>Оригинальность сюжета:</strong> {{ entry.plot_originality }}/5</p>
+        <p><strong>Развитие персонажей:</strong> {{ entry.character_development }}/5</p>
+        <p><strong>Мир:</strong> {{ entry.world_building }}/5</p>
+        <p><strong>Романтика:</strong> {{ entry.romance }}/5</p>
+        <p><strong>Юмор:</strong> {{ entry.humor }}/5</p>
+        <p><strong>Смысл:</strong> {{ entry.meaning }}/5</p>
+        <p><strong>Резюме:</strong> {{ entry.summary|linebreaks }}</p>
+        <p class="diary-entry__date">Добавлено: {{ entry.created_at|date:"d.m.Y H:i" }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Записей в дневнике пока нет.</p>
+  {% endif %}
+</section>
+{% endblock %}

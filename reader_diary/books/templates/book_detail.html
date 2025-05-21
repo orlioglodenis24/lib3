@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ book.title }} — Читательский дневник{% endblock %}
+{% block content %}
+<section class="book-detail">
+  <div class="book-detail__top">
+    <img
+      src="{{ book.cover_image.url if book.cover_image else static('images/default_cover.jpg') }}"
+      alt="Обложка книги {{ book.title }}"
+      class="book-detail__cover"
+      loading="lazy"
+    />
+    <div class="book-detail__info">
+      <h2 class="book-detail__title">{{ book.title }}</h2>
+      <p class="book-detail__author">Автор: {{ book.author.name }}</p>
+      <p class="book-detail__genre">Жанр: {{ book.genre.name }}</p>
+      <p class="book-detail__publisher">Издатель: {{ book.publisher }}</p>
+      <p class="book-detail__year">Год: {{ book.year }}</p>
+      <p class="book-detail__pages">Страниц: {{ book.pages }}</p>
+      <p class="book-detail__age-limit">Возрастное ограничение: {{ book.age_limit }}</p>
+
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'set_status' book.id %}" class="book-detail__status-form">
+        {% csrf_token %}
+        <label for="status-select">Статус чтения:</label>
+        <select name="status" id="status-select" class="book-detail__status-select">
+          <option value="planned" {% if user_status == 'planned' %}selected{% endif %}>В планах</option>
+          <option value="reading" {% if user_status == 'reading' %}selected{% endif %}>Читаю</option>
+          <option value="read" {% if user_status == 'read' %}selected{% endif %}>Прочитал</option>
+          <option value="dropped" {% if user_status == 'dropped' %}selected{% endif %}>Брошено</option>
+        </select>
+        <button type="submit" class="btn btn--primary">Сохранить</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="book-detail__annotation">
+    <h3>Аннотация</h3>
+    <p>{{ book.annotation|linebreaks }}</p>
+  </div>
+
+  {% if book.text_file %}
+  <div class="book-detail__download">
+    <a href="{{ book.text_file.url }}" class="btn btn--secondary" download>Скачать книгу</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

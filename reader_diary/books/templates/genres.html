@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Жанры — Читательский дневник{% endblock %}
+
+{% block content %}
+<section class="genres">
+  <h2 class="genres__title">Список жанров</h2>
+
+  {% if genres %}
+    <ul class="genres__list">
+      {% for genre in genres %}
+        <li class="genres__item">{{ genre.name }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Жанры не найдены.</p>
+  {% endif %}
+</section>
+{% endblock %}

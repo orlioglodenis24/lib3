@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}  {# Обязательно подключаем static #}
+
+{% block title %}Мои книги — Читательский дневник{% endblock %}
+
+{% block content %}
+<section class="user-books">
+  <h2 class="user-books__title">Мои книги</h2>
+
+  {% if books %}
+    <div class="books-grid">
+      {% for ub in books %}
+      <article class="book-card" tabindex="0">
+        {% if ub.book.cover_image %}
+          <img
+            src="{{ ub.book.cover_image.url }}"
+            alt="Обложка книги {{ ub.book.title }}"
+            class="book-card__image"
+            loading="lazy"
+          />
+        {% else %}
+          <img
+            src="{% static 'images/default_cover.jpg' %}"
+            alt="Обложка книги {{ ub.book.title }}"
+            class="book-card__image"
+            loading="lazy"
+          />
+        {% endif %}
+        <div class="book-card__info">
+          <h3 class="book-card__title">{{ ub.book.title }}</h3>
+          <p class="book-card__author">Автор: {{ ub.book.author.name }}</p>
+          <p class="book-card__status">Статус: {{ ub.get_status_display }}</p>
+          <a href="{% url 'book_detail' ub.book.id %}" class="book-card__button">Подробнее</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Вы еще не добавили книги.</p>
+  {% endif %}
+</section>
+{% endblock %}

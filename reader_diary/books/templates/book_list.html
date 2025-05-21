@@ -1,0 +1,41 @@
+{% load static %}
+ <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+<div class="book-detail">
+  <div class="book-header">
+    <img src="{{ book.cover_image_url }}" alt="Обложка книги" class="book-cover" />
+    <div class="book-info">
+      <h1>{{ book.title }}</h1>
+      <p><strong>Автор:</strong> {{ book.author }}</p>
+      <p><strong>Издательство:</strong> {{ book.publisher }}</p>
+      <p><strong>Год издания:</strong> {{ book.year }}</p>
+      <p><strong>Страниц:</strong> {{ book.pages }}</p>
+      <p><strong>Возрастное ограничение:</strong> {{ book.age_limit }}</p>
+      <p><strong>Жанр:</strong> {{ book.genre }}</p>
+    </div>
+  </div>
+  <div class="annotation">
+    <h3>Аннотация</h3>
+    <p>{{ book.annotation }}</p>
+  </div>
+  <div class="book-actions">
+    <button class="btn status-btn" data-status="reading">Читаю</button>
+    <button class="btn status-btn" data-status="read">Прочитал</button>
+    <button class="btn status-btn" data-status="planned">В планах</button>
+    <button class="btn status-btn" data-status="dropped">Брошено</button>
+    <a href="/read/{{ book.id }}" class="btn btn-read">Читать</a>
+    <a href="/diary/{{ book.id }}" class="btn btn-diary">Дневник</a>
+  </div>
+  <div class="similar-books">
+    <h3>Похожие книги</h3>
+    <ul>
+      {% for similar_book in similar_books %}
+      <li>
+        <a href="/book/{{ similar_book.id }}">
+          <img src="{{ similar_book.cover_image_url }}" alt="{{ similar_book.title }}" />
+          <span>{{ similar_book.title }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

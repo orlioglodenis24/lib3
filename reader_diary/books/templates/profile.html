@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль — Читательский дневник{% endblock %}
+{% block content %}
+<section class="profile">
+  <h2 class="profile__title">Профиль пользователя</h2>
+  <div class="profile__info">
+    <div class="profile__avatar">
+      {% if user.profile.avatar %}
+        <img src="{{ user.profile.avatar.url }}" alt="Аватар {{ user.username }}" loading="lazy" />
+      {% else %}
+        <img src="{% static 'images/1984.jpg' %}" alt="Аватар по умолчанию" loading="lazy" />
+      {% endif %}
+    </div>
+    <div class="profile__details">
+      <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <!-- Можно добавить редактирование профиля -->
+      <!-- <a href="{% url 'profile_edit' %}" class="btn btn--primary">Редактировать профиль</a> -->
+    </div>
+  </div>
+</section>
+{% endblock %}
